@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+// データを守るため countProvider という壁を作る
+final countProvider = StateProvider<int>((ref) => 0);
+// グローバルに定義して良いの？と思われるかもしれませんが、問題有りません。
+// 値の保存自体はローカルのスコープ内で行っています。
+// プロバイダ自体は不変（イミュータブル）であり、関数をグローバルで宣言しているのと変わりないためです。
+// https://riverpod.dev/ja/docs/concepts/providers/
 
 void main() {
-  runApp(const MyApp());
+  // プロバイダースコープで囲む
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -15,18 +24,20 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatefulWidget {
+// プロバイダで値を参照するWidgetをConsumerWidgetを継承したWidgetに書き換え
+// （int _counter = 0;を削除、StatefulWidgetをStatelessWidgetに書き換え、
+// StatelessWidgetをConsumerWidgetに置き換えます。）
+class MyHomePage extends ConsumerWidget {
   const MyHomePage({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
+  // ConsumerWidgetを使ったらWidgetRef refを必ず書き、refという鍵を手に入れる
+  // これでプロバイダを参照する準備ができる
+  Widget build(BuildContext context, WidgetRef ref) {
+    // データを見張っておく
+    // プロバイダの値に変更があった場合、この値に依存するWidgetの更新が行われる
+    // ref.watch(countProvider)
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blue,
@@ -40,7 +51,10 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Text('ボタンを押した回数'),
-                Text('$_counter', style: const TextStyle(fontSize: 30)),
+                Text(
+                  '${ref.watch(countProvider)}',
+                  style: const TextStyle(fontSize: 30),
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -60,9 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          setState(() {
-            _counter++;
-          });
+          ref.read(countProvider.notifier).state++;
         },
         child: const Icon(Icons.add),
       ),
@@ -70,11 +82,11 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class MySecondPage extends StatelessWidget {
+class MySecondPage extends ConsumerWidget {
   const MySecondPage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.red,
@@ -86,9 +98,12 @@ class MySecondPage extends StatelessWidget {
           children: [
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: const [
-                Text('ボタンを押した回数'),
-                Text('ここに回数を表示', style: TextStyle(fontSize: 30)),
+              children: [
+                const Text('ボタンを押した回数'),
+                Text(
+                  '${ref.watch(countProvider)}',
+                  style: const TextStyle(fontSize: 30),
+                ),
               ],
             ),
             const SizedBox(height: 20),
@@ -102,7 +117,9 @@ class MySecondPage extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          ref.read(countProvider.notifier).state++;
+        },
         child: const Icon(Icons.add),
       ),
     );
