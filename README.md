@@ -1,16 +1,8 @@
-# counter_app
+# カウンターアプリ
 
-A new Flutter project.
+## 機能一覧
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- 2つの画面でカウンターを設置
+- 画面遷移後の「ここに回数を表示」にカウンターの値を表示
+- 画面遷移後のページでも、ボタンを押すことによりカウントアップする
+- 画面を戻った際、カウントアップが反映されているようにする
